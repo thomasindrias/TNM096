@@ -102,9 +102,9 @@ class Puzzle {
   solve() {
     const startNode = new Node(
       [
-        [2, 5, 0],
-        [1, 4, 8],
-        [7, 3, 6],
+        [8, 6, 7],
+        [2, 5, 4],
+        [3, 0, 1],
       ],
       0,
       0,

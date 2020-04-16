@@ -1,0 +1,53 @@
+Task 1
+
+a)
+(for easy)
+DFGS: Elapsed time  0:00:56.364000
+Backtracking: Elapsed time  0:00:00.017000
+AC3: Elapsed time  0:00:00.029000
+Min-Conflict: Elapsed time  0:01:06.678000
+
+n = number of variables. For example 9x9 grid gives 81 variables
+d = 9 = sizeof({1,2,3,4,5,6,7,8,9})
+
+DFGS complexity: O(d^n)
+Backtracking complexity: O(d^n) there are d possibilites and n is the number of spaces.
+AC-3 complexity: O(n^2 * d^3)
+
+Depth-first works poor since we are just brute-forcing.
+Backtracking cuts the branches where the constraint cannot be fulfilled = the search space is shrinked. Can use heuristics to improve performance.
+AC3 works well for simple sudoku problems but quickly escalates for harder problems.
+Min-conflicts is good for local search, might get stuck in local minima for more general problems.
+
+b)
+Backtracking without inference works poorly since this is common to depth-first search.
+With FC, it can keep track of the remaining values for unassigned variables that are connected to the current variable.
+Performance was improved by using MRV as heuristic. This is because we choose a path that will be as effective as possible.
+=> BT + FC + MRV
+
+Task 2
+
+a) 
+DFGS: n < 25 works well. Above that takes considerably long time because of exponential growth.
+Backtracking: We tried n = 500 which took ~6 seconds. 
+AC3: Cant solve n > 0.
+Min-conflicts: n = 3000. Given random initial state, Min-Conflicts solves n-queens in almost
+constant time for arbitrary n with high probability
+
+b)
+With n= 20:
+Elapsed time  0:00:00.006000 for BT + FC + MRV
+Elapsed time  0:00:00.011000 for BT + MRV
+Elapsed time  0:00:01.879000 for BT + FC
+Elapsed time  0:00:03.496000 for BT
+
+Works best when using both inference and some heuristic.
+It can be seen in the evaluation that the backtracking becomes 
+more complex when heurestics is not used.
+
+c)
+For n=3000, it takes 30 steps/iterations.
+
+d) 
+In state-based search we have to define a heuristic that matches the exact problem that is faced (domain dependant).
+In constraint-based search we use a general purpose heuristic that can tackle all problems.

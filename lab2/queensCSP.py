@@ -23,9 +23,9 @@ start = time()
 problem = NQueensCSP(n)
 
 # 2. Solve the problem
-solution = backtracking_search(problem)
+#solution = backtracking_search(problem)
 #solution = AC3(problem); 
-#solution = min_conflicts(problem)
+solution = min_conflicts(problem)
 
 # 3. Print the results
 print
@@ -40,7 +40,7 @@ if type(solution) is bool:
 # 4. Handle other solutions next
 elif problem.goal_test(solution):
     print "Solution:", solution
-    problem.display(problem.infer_assignment())
+    #problem.display(problem.infer_assignment())
 else:
     print "Failed - domains: " + str(problem.curr_domains)
     problem.display(problem.infer_assignment())
