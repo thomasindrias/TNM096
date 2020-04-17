@@ -11,7 +11,7 @@ class Schedule {
       "MT502", "     ", "     "
     ];
     this.courses = this.shuffle(courses);
-    this.conflicts = 0;
+    this.conflicts = [];
     this.score = 0;
   }
 
