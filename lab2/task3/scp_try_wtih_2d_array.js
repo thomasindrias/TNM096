@@ -1,82 +1,87 @@
 class Schedule {
   constructor() {
     const courses = [
-      "MT101", "MT102", "MT103",
-      "MT104", "MT105", "MT106",
-      "MT107", "MT201", "MT202",
-      "MT203", "MT204", "MT205",
-      "MT206", "MT301", "MT302",
-      "MT303", "MT304", "MT401",
-      "MT402", "MT403", "MT501",
-      "MT502", "     ", "     "
+      ["MT101", "MT102", "MT103"],
+      ["MT104", "MT105", "MT106"],
+      ["MT107", "MT201", "MT202"],
+      ["MT203", "MT204", "MT205"],
+      ["MT206", "MT301", "MT302"],
+      ["MT303", "MT304", "MT401"],
+      ["MT402", "MT403", "MT501"],
+      ["MT502", "     ", "     "],
     ];
+
     this.courses = this.shuffle(courses);
-    this.conflicts = 0;
+
+    this.nConflicts = this.tot_conflicts();
     this.score = 0;
   }
 
   // Shuffle an array
   shuffle(c) {
     for (let i = c.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * i);
-      const temp = c[i];
-      c[i] = c[j];
-      c[j] = temp;
+      for (let j = c[0].length - 1; j > 0; j--) {
+        const a = Math.floor(Math.random() * i);
+        const b = Math.floor(Math.random() * j);
+        const temp = c[i][j];
+        c[i][j] = c[a][b];
+        c[a][b] = temp;
+      }
     }
     return c;
   }
 
   // Check if conflict between MT1,2,3,4,5
-  get_conflicts() {
-    const conflicts = [];
+  tot_conflicts() {
+    let nConflicts = 0;
+    for (let i = 0; i < this.courses.length; i++) {
+      let col1 = this.courses[i][0].charAt(2);
+      let col2 = this.courses[i][1].charAt(2);
+      let col3 = this.courses[i][2].charAt(2);
 
-    for (let i = 0; i < this.courses.length; i += 3) {
-      let col1 = this.courses[i].charAt(2);
-      let col2 = this.courses[i + 1].charAt(2);
-      let col3 = this.courses[i + 2].charAt(2);
+      if (col1 === col2 || col1 === col3 || col2 === col3)
+        nConflicts++;
 
-      if (col1 === col2 || col1 === col3 || col2 === col3) {
-        conflicts.push(i);
-      }
     }
-    return conflicts;
+    return nConflicts;
   }
 
   // Generate a schedule with min conflict
   generate() {
-    let conflicts = this.get_conflicts();
+    let nConflicts = this.tot_conflicts();
     let n = 0;
-    let maxIt = 100;
+    let maxIt = 3000;
 
-    while (n < maxIt && conflicts.length > 0) {
+    while (n < maxIt && nConflicts > 0) {
       n++;
 
-      // Random course from conflicts array
-      const randInd = conflicts[Math.floor(Math.random() * conflicts.length)];
+      // Random course from courses
+      const randInd = {
+        row: Math.floor(Math.random() * this.courses.length),
+        col: Math.floor(Math.random() * this.courses[0].length)
+      };
       // Find index for minimum conflicts
-      const minInd = parseInt(this.minConflicts(randInd));
+      const minInd = this.minConflicts(randInd);
 
       //console.log("BEFORE", JSON.parse(JSON.stringify(this.courses)));
-      //console.log("swapping index:", randInd + " and ", minInd);
+      //console.log("swapping index:", [randInd.row, randInd.col] + " and ", minInd);
 
       //Swap
-      var b = this.courses[randInd];
-      this.courses[randInd] = this.courses[minInd];
-      this.courses[minInd] = b;
+      var b = this.courses[randInd.row][randInd.col];
+      this.courses[randInd.row][randInd.col] = this.courses[minInd.row][minInd.col];
+      this.courses[minInd.row][minInd.col] = b;
 
-      conflicts = this.get_conflicts();
+      nConflicts = this.tot_conflicts();
 
       //console.log("AFTER", JSON.parse(JSON.stringify(this.courses)));
     }
 
-    this.conflicts = conflicts;
-
+    this.nConflicts = nConflicts;
     this.scheduleScore();
   }
 
   // Find conflicts between columns
   findConflicts(year, index) {
-    let col = index % 3;
     let nConflicts = 0;
     let neighbours = ["", ""];
 
@@ -84,16 +89,15 @@ class Schedule {
 
     // MT5 allowed to conflict
     if (year === "5") return 0;
-
-    if (col == 0) {
-      neighbours[0] = this.courses[index + 1];
-      neighbours[1] = this.courses[index + 2];
-    } else if (col == 1) {
-      neighbours[0] = this.courses[index - 1];
-      neighbours[1] = this.courses[index + 1];
-    } else if (col == 2) {
-      neighbours[0] = this.courses[index - 1];
-      neighbours[1] = this.courses[index - 2];
+    if (index.col == 0) {
+      neighbours[0] = this.courses[index.row][1];
+      neighbours[1] = this.courses[index.row][2];
+    } else if (index.col == 1) {
+      neighbours[0] = this.courses[index.row][0];
+      neighbours[1] = this.courses[index.row][2];
+    } else if (index.col == 2) {
+      neighbours[0] = this.courses[index.row][0];
+      neighbours[1] = this.courses[index.row][1];
     }
 
     if (year === neighbours[0].charAt(2)) nConflicts++;
@@ -105,7 +109,7 @@ class Schedule {
 
   // Minimize conflicts
   minConflicts(index) {
-    let course = this.courses[index];
+    let course = this.courses[index.row][index.col];
     let year = course.charAt(2);
 
     let minInd = index;
@@ -116,12 +120,21 @@ class Schedule {
 
     // Compare course with other courses in schedule
     for (let i = 0; i < this.courses.length; i++) {
-      let tempConflicts = this.findConflicts(year, i);
+      for (let j = 0; j < this.courses[0].length; j++) {
+        let tempConflicts = this.findConflicts(year, {
+          row: i,
+          col: j
+        });
 
-      if (tempConflicts < minIndConflict) {
-        minIndConflict = tempConflicts;
-        minInd = i;
+        if (tempConflicts < minIndConflict) {
+          minIndConflict = tempConflicts;
+          minInd = {
+            row: i,
+            col: j
+          };
+        }
       }
+
     }
 
     return minInd;
@@ -151,35 +164,42 @@ class Schedule {
     // [{time: x, courses[MTX MTX MTX]}, ...]
     let schedule = [{
         time: '9 am',
-        courses: JSON.parse(JSON.stringify(this.courses)).slice(0, 3),
+        courses: JSON.parse(JSON.stringify(this.courses[0])),
       },
       {
         time: '10 am',
-        courses: JSON.parse(JSON.stringify(this.courses)).slice(3, 6),
+        courses: JSON.parse(JSON.stringify(this.courses[1])),
+
       },
       {
         time: '11 am',
-        courses: JSON.parse(JSON.stringify(this.courses)).slice(6, 9),
+        courses: JSON.parse(JSON.stringify(this.courses[2])),
+
       },
       {
         time: '12 pm',
-        courses: JSON.parse(JSON.stringify(this.courses)).slice(9, 12),
+        courses: JSON.parse(JSON.stringify(this.courses[3])),
+
       },
       {
         time: '1 pm',
-        courses: JSON.parse(JSON.stringify(this.courses)).slice(12, 15),
+        courses: JSON.parse(JSON.stringify(this.courses[4])),
+
       },
       {
         time: '2 pm',
-        courses: JSON.parse(JSON.stringify(this.courses)).slice(15, 18),
+        courses: JSON.parse(JSON.stringify(this.courses[5])),
+
       },
       {
         time: '3 pm',
-        courses: JSON.parse(JSON.stringify(this.courses)).slice(18, 21),
+        courses: JSON.parse(JSON.stringify(this.courses[6])),
+
       },
       {
         time: '4 pm',
-        courses: JSON.parse(JSON.stringify(this.courses)).slice(21, 24),
+        courses: JSON.parse(JSON.stringify(this.courses[7])),
+
       },
 
     ];
@@ -189,29 +209,29 @@ class Schedule {
 
 class Schedules {
   constructor() {
-    this.schedules = [];
+    this.steps = 0;
     this.maxScore = 0;
     this.bestIndex = 0;
-
+    this.bestSchedule = {};
     this.schedule = new Schedule();
     this.schedule.generate();
   }
 
   // Loop till we find the optimal schedule
   findBestSchedule() {
-    while (this.schedules.length < 500) {
+    while (this.steps < 100) {
       const schedule = new Schedule();
       schedule.generate();
 
       // Check if stuck at local minima
-      if (schedule.conflicts.length != 0)
+      if (schedule.nConflicts != 0)
         continue;
 
-      this.schedules.push(schedule.generateObject());
+      this.steps++;
 
       if (schedule.score > this.maxScore) {
         this.maxScore = schedule.score;
-        this.bestIndex = this.schedules.length - 1;
+        this.bestSchedule = schedule.generateObject();
       }
 
       if (schedule.score == 4) {
@@ -223,25 +243,16 @@ class Schedules {
 
   getBestSchedule() {
     schedules.findBestSchedule();
-    console.log("Steps: ", this.schedules.length);
-    return this.schedules[this.bestIndex];
+    console.log("Steps: ", this.steps);
+    return this.bestSchedule;
   }
 }
 
 const schedules = new Schedules();
 
 console.log("TASK 3:");
-console.log("TOTAL CONFLICTS:", schedules.schedule.conflicts.length);
+console.log("TOTAL CONFLICTS:", schedules.schedule.nConflicts);
 console.log(schedules.schedule.generateObject());
 
 console.log("TASK 4:");
-//console.log(schedules.getBestSchedule);
-
-const output = schedules.getBestSchedule();
-output.map(o => {
-  const text = document.createTextNode(JSON.stringify(o) + '\n');
-  document.getElementById('output').appendChild(text);
-  document.getElementById('output').appendChild(document.createElement("br"));
-});
-
-document.getElementById('steps').textContent = "Steps: " + schedules.schedules.length;
+//console.log(schedules.getBestSchedule());

@@ -11,7 +11,7 @@ class Schedule {
       "MT502", "     ", "     "
     ];
     this.courses = this.shuffle(courses);
-    this.conflicts = 0;
+    this.nConflicts = this.tot_conflicts();
     this.score = 0;
   }
 
@@ -27,8 +27,8 @@ class Schedule {
   }
 
   // Check if conflict between MT1,2,3,4,5
-  get_conflicts() {
-    const conflicts = [];
+  tot_conflicts() {
+    let nConflicts = 0;
 
     for (let i = 0; i < this.courses.length; i += 3) {
       let col1 = this.courses[i].charAt(2);
@@ -36,23 +36,23 @@ class Schedule {
       let col3 = this.courses[i + 2].charAt(2);
 
       if (col1 === col2 || col1 === col3 || col2 === col3) {
-        conflicts.push(i);
+        nConflicts++;
       }
     }
-    return conflicts;
+    return nConflicts;
   }
 
   // Generate a schedule with min conflict
   generate() {
-    let conflicts = this.get_conflicts();
+    let nConflicts = this.tot_conflicts();
     let n = 0;
-    let maxIt = 100;
+    let maxIt = 10000;
 
-    while (n < maxIt && conflicts.length > 0) {
+    while (n < maxIt && nConflicts > 0) {
       n++;
 
-      // Random course from conflicts array
-      const randInd = conflicts[Math.floor(Math.random() * conflicts.length)];
+      // Random course from courses
+      const randInd = Math.floor(Math.random() * this.courses.length);
       // Find index for minimum conflicts
       const minInd = parseInt(this.minConflicts(randInd));
 
@@ -64,13 +64,12 @@ class Schedule {
       this.courses[randInd] = this.courses[minInd];
       this.courses[minInd] = b;
 
-      conflicts = this.get_conflicts();
+      nConflicts = this.tot_conflicts();
 
       //console.log("AFTER", JSON.parse(JSON.stringify(this.courses)));
     }
 
-    this.conflicts = conflicts;
-
+    this.nConflicts = nConflicts;
     this.scheduleScore();
   }
 
@@ -204,7 +203,7 @@ class Schedules {
       schedule.generate();
 
       // Check if stuck at local minima
-      if (schedule.conflicts.length != 0)
+      if (schedule.nConflicts != 0)
         continue;
 
       this.schedules.push(schedule.generateObject());
@@ -231,17 +230,8 @@ class Schedules {
 const schedules = new Schedules();
 
 console.log("TASK 3:");
-console.log("TOTAL CONFLICTS:", schedules.schedule.conflicts.length);
+console.log("TOTAL CONFLICTS:", schedules.schedule.nConflicts);
 console.log(schedules.schedule.generateObject());
 
 console.log("TASK 4:");
-//console.log(schedules.getBestSchedule);
-
-const output = schedules.getBestSchedule();
-output.map(o => {
-  const text = document.createTextNode(JSON.stringify(o) + '\n');
-  document.getElementById('output').appendChild(text);
-  document.getElementById('output').appendChild(document.createElement("br"));
-});
-
-document.getElementById('steps').textContent = "Steps: " + schedules.schedules.length;
+console.log(schedules.getBestSchedule());
