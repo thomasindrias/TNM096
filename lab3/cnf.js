@@ -105,7 +105,7 @@ class CNF {
   incorporate_clause(A, KB) {
     for (let i = 0; i < KB.length; i++) {
       if (this.isSubset(KB[i], A)) {
-        console.log("Subset");
+        // console.log("Subset");
         return KB;
       }
     }
@@ -116,7 +116,7 @@ class CNF {
       if (!this.isStrictSubset(A, KB[i])) {
         // console.log("push", KB[i])
         tempKB.push(KB[i].copy());
-      } else console.log("Strict Subset");
+      } // else console.log("Strict Subset");
     }
 
     tempKB.push(A.copy());
@@ -127,13 +127,13 @@ class CNF {
   incorporate(S, KB) {
 
     S.forEach(A => {
-      console.log("DEBUG INCORPORATES")
-      A.log()
-      console.log("KB (incorporate)", KB)
+      // console.log("DEBUG INCORPORATES")
+      // A.log()
+      // console.log("KB (incorporate)", KB)
       KB = this.incorporate_clause(A, KB);
     });
 
-    console.log("KB result (incorporate)", KB)
+    // console.log("KB result (incorporate)", KB)
     return KB;
   }
 
@@ -155,7 +155,7 @@ class CNF {
           }
         }
 
-      console.log("S", S);
+      // console.log("S", S);
 
       if (S.length === 0) return KB;
 
@@ -179,13 +179,6 @@ const apaC = new Clause(['-movie', '+money']);
 const apaD = new Clause(['-movie', '-ice']);
 const apaE = new Clause(['+movie']);
 
-const clauseList3 = [];
-
-const testA = new Clause(['-sun', '-money', '+ice']);
-const testB = new Clause(['-money', '+ice', '+movie']);
-const testC = new Clause(['-movie', '+money']);
-const testD = new Clause(['-movie', '-ice']);
-
 clauseList1.push(clauseA);
 clauseList1.push(clauseB);
 
@@ -195,15 +188,10 @@ clauseList2.push(apaC);
 clauseList2.push(apaD);
 clauseList2.push(apaE);
 
-clauseList3.push(testA);
-clauseList3.push(testB);
-clauseList3.push(testC);
-clauseList3.push(testD);
-
 const cnf = new CNF();
 
 const KB = cnf.solver(clauseList2);
 
-console.log("KB", KB);
+console.log("Resulting KB", KB);
 
 // const resolution = cnf.resolution(clauseA, clauseB);
