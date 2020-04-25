@@ -49,30 +49,10 @@ class CNF {
 
     return this.isSubset(A, B);
   }
-
-  equalsLists(L1, L2) {
-    let check = 0;
-
-    if (L1.length === 0 || L2.length === 0) return false;
-
-    for (let i = 0; i < L1.length; i++)
-      for (let j = 0; j < L2.length; j++) {
-        if (this.equals(L1[i], L2[j])) {
-          check++;
-          break;
-        }
-      }
-
-    return (check === L1.length);
-  }
   /*---------------  CNF functions ----------------*/
   resolution(clauseA, clauseB) {
     let A = clauseA.copy();
     let B = clauseB.copy();
-
-    // console.log("BEFORE")
-    // A.log()
-    // B.log()
 
     const intersection1 = this.intersection(A.positives, B.negatives);
     const intersection2 = this.intersection(A.negatives, B.positives);
@@ -83,12 +63,10 @@ class CNF {
 
     if (intersection1.size > 0) {
       let a = this.getRandomItem(intersection1);
-      // console.log("Ap snitt Bn != {}", intersection1)
       A.positives.delete(a);
       B.negatives.delete(a);
     } else {
       let a = this.getRandomItem(intersection2);
-      // console.log("Ap snitt Bn == {}", intersection2)
       A.negatives.delete(a);
       B.positives.delete(a);
     }
@@ -105,43 +83,36 @@ class CNF {
   incorporate_clause(A, KB) {
     for (let i = 0; i < KB.length; i++) {
       if (this.isSubset(KB[i], A)) {
-        console.log("Subset");
+        console.log("JFG");
         return KB;
       }
     }
 
-    let tempKB = [];
-
     for (let i = 0; i < KB.length; i++) {
-      if (!this.isStrictSubset(A, KB[i])) {
-        // console.log("push", KB[i])
-        tempKB.push(KB[i].copy());
-      } else console.log("Strict Subset");
+      if (this.isStrictSubset(A, KB[i])) {
+        KB[i].negatives = A.negatives;
+        KB[i].positives = A.positives;
+      }
     }
 
-    tempKB.push(A.copy());
-
-    return tempKB;
+    return KB;
   }
 
   incorporate(S, KB) {
-
     S.forEach(A => {
-      console.log("DEBUG INCORPORATES")
-      A.log()
-      console.log("KB (incorporate)", KB)
       KB = this.incorporate_clause(A, KB);
     });
 
-    console.log("KB result (incorporate)", KB)
     return KB;
   }
 
   solver(KB) {
     let KBprim = [];
-    let C = null;
+    let C = new Clause([]);
 
-    while (!this.equalsLists(KBprim, KB)) {
+    let flag = true;
+
+    while (flag || C && !C.isEmpty()) {
       let S = [];
       KBprim = KB;
 
@@ -150,16 +121,15 @@ class CNF {
 
           C = this.resolution(KB[i], KB[j]);
 
-          if (C !== false) {
-            S.push(C);
-          }
+          if (C != false) S.push(C);
         }
 
       console.log("S", S);
 
-      if (S.length === 0) return KB;
+      // if (S.length === 0) return KB;
 
-      KB = this.incorporate(S, KB);
+      KB = this.incorporate(S, KB)
+      flag = false
     }
 
     return KB;
@@ -168,8 +138,10 @@ class CNF {
 
 const clauseList1 = [];
 
-const clauseA = new Clause(['+a', '+b', '-c']);
-const clauseB = new Clause(['+c', '+b']);
+const clauseA = new Clause(['-db']);
+const clauseB = new Clause(['+da', '+dc']);
+const clauseC = new Clause(['-c', '+a']);
+const clauseD = new Clause(['+a', '+b', '+c']);
 
 const clauseList2 = [];
 
@@ -177,31 +149,18 @@ const apaA = new Clause(['-sun', '-money', '+ice']);
 const apaB = new Clause(['-money', '+ice', '+movie']);
 const apaC = new Clause(['-movie', '+money']);
 const apaD = new Clause(['-movie', '-ice']);
-const apaE = new Clause(['+movie']);
-
-const clauseList3 = [];
-
-const testA = new Clause(['-sun', '-money', '+ice']);
-const testB = new Clause(['-money', '+ice', '+movie']);
-const testC = new Clause(['-movie', '+money']);
-const testD = new Clause(['-movie', '-ice']);
 
 clauseList1.push(clauseA);
 clauseList1.push(clauseB);
+clauseList1.push(clauseC);
+clauseList1.push(clauseD);
 
 clauseList2.push(apaA);
 clauseList2.push(apaB);
 clauseList2.push(apaC);
 clauseList2.push(apaD);
-clauseList2.push(apaE);
-
-clauseList3.push(testA);
-clauseList3.push(testB);
-clauseList3.push(testC);
-clauseList3.push(testD);
 
 const cnf = new CNF();
-
 const KB = cnf.solver(clauseList2);
 
 console.log("KB", KB);
