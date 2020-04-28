@@ -113,7 +113,6 @@ class CNF {
       } else if (this.isStrictSubset(A, B)) {
         KB.splice(i, 1);
       }
-
     });
 
     tempKB.push(A.copy());
@@ -162,6 +161,7 @@ class CNF {
   }
 }
 
+/*
 const clauseList1 = [];
 
 const clauseA = new Clause(['+a', '+b', '-c']);
@@ -189,5 +189,40 @@ const cnf = new CNF();
 const KB = cnf.solver(clauseList2);
 
 console.log("Resulting KB", KB);
+*/
 
-// const resolution = cnf.resolution(clauseA, clauseB);
+
+// ------------- TASK B: Robbery ---------------------
+
+/*
+1. our logic
+(a v b v c) &
+(a->b) &
+-(c & -a & -b)
+
+2. from online converter:
+(a V b V c) &
+(-c V a) &
+(c V a V -b)
+*/
+
+// Solve by using input from online converter 
+// (A ∨ B ∨ C) ∧ (¬C ∨ A) ∧ (C ∨ A ∨ ¬B)
+
+const rob1 = new Clause(['+a', '+b', '+c']);
+const rob2 = new Clause(['-c', '+a']);
+const rob3 = new Clause(['+c', '+a', '-b']);
+const rob4 = new Clause(['-b']);
+
+const clauseList = [];
+
+clauseList.push(rob1);
+clauseList.push(rob2);
+clauseList.push(rob3);
+clauseList.push(rob4);
+
+const cnf = new CNF();
+
+const KB = cnf.solver(clauseList);
+
+console.log("Resulting KB", KB);
