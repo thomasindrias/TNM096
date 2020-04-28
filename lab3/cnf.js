@@ -103,29 +103,24 @@ class CNF {
   }
 
   incorporate_clause(A, KB) {
-    for (let i = 0; i < KB.length; i++) {
-      if (this.isSubset(KB[i], A)) {
-        // console.log("Subset");
-        return KB;
-      }
-    }
-
     let tempKB = [];
 
-    for (let i = 0; i < KB.length; i++) {
-      if (!this.isStrictSubset(A, KB[i])) {
-        // console.log("push", KB[i])
-        tempKB.push(KB[i].copy());
-      } // else console.log("Strict Subset");
-    }
+    KB.forEach((B, i) => {
+      if (this.isSubset(B, A)) {
+        return KB;
+      } else if (!this.isStrictSubset(A, B)) {
+        tempKB.push(B.copy());
+      } else if (this.isStrictSubset(A, B)) {
+        KB.splice(i, 1);
+      }
+
+    });
 
     tempKB.push(A.copy());
-
     return tempKB;
   }
 
   incorporate(S, KB) {
-
     S.forEach(A => {
       // console.log("DEBUG INCORPORATES")
       // A.log()
@@ -133,7 +128,7 @@ class CNF {
       KB = this.incorporate_clause(A, KB);
     });
 
-    // console.log("KB result (incorporate)", KB)
+    console.log("KB result (incorporate)", JSON.parse(JSON.stringify(KB)))
     return KB;
   }
 
@@ -155,11 +150,12 @@ class CNF {
           }
         }
 
-      // console.log("S", S);
+      console.log("S", S);
 
       if (S.length === 0) return KB;
 
       KB = this.incorporate(S, KB);
+      // console.log(KB)
     }
 
     return KB;
