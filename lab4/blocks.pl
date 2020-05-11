@@ -6,57 +6,71 @@
 %  In the query window, run the goal:
 %  ?- plan.
 
+:- use_module(library(clpfd)).
+
+block(X) :- X in 2..4 \/ 6.
+triangle(X) :- X in 1 \/ 5.
+
+editable(X) :- X in 1..6.
+table(X) :- X in 7.
+
+r(X) :- X in 1 \/ 4.
+g(X) :- X in 2 \/ 5.
+b(X) :- X in 3 \/ 6.
 
 % actions
 act( pick_from_table(X),                             % action name
-     [block(X), handempty,  clear(X), on(X,table)],  % preconditions
-     [handempty, on(X, table)],                      % delete
+     [handempty,  top(X), on(X,7)],  % preconditions
+     [handempty, on(X, 7)],                      % delete
      [holding(X)]                                    % add
-     ).
+     ):-
+     editable(X).
 
 
 act( pickup_from_block(X,Y),
-     [block(X), handempty, clear(X), on(X,Y), block(Y), diff(X,Y)],  % (1)
+     [handempty, top(X), on(X,Y)],
      [handempty, on(X, Y)],
-     [holding(X), clear(Y)]
-     ).
-% (1)  diff(X,Y) is needed to prevent cases like pickup_from_block(a,a)
+     [holding(X), top(Y)]
+     ):-
+     editable(X).
 
 
 act( putdown_on_table(X),
-     [block(X), holding(X)],
      [holding(X)],
-     [handempty, on(X,table)]
-     ).
+     [holding(X)],
+     [handempty, on(X,7)]
+     ):-
+     editable(X).
 
 
 act(  putdown_on_block(X,Y),
-     [block(X), holding(X), block(Y), clear(Y), diff(X,Y)],
-     [holding(X), clear(Y)],
+     [holding(X), top(Y)],
+     [holding(X), top(Y)],
      [handempty, on(X,Y)]
-     ).
+     ):-
+     editable(X), block(Y).
 
 
-goal_state( [on(c,b),on(a,c) ]).
+goal_state( [
+  on(X, Y),
+  on(Y, Z)
+  ]):-
+  g(Y), b(Z).
 
 initial_state(
-     [      clear(b),
-            clear(c),
-            on(c,a),
-            on(a,table),
-            on(b,table),
-            handempty,
-            block(a),
-            block(b),
-            block(c),
-            diff(a,b),
-            diff(a,c),
-            diff(b,a),
-            diff(b,c),
-            diff(c,a),
-            diff(c,b),
-            diff(a,table),
-            diff(b,table),
-            diff(c,table)
+     [      handempty,
+
+            % Blocks position
+            on(1,7),
+            on(2,7),
+            on(3,4),
+            on(4,7),
+            on(5,6),
+            on(6,7),
+
+            % On top
+            top(1),
+            top(2),
+            top(3),
+            top(5)
      ]).
-     
