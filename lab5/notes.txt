@@ -1,0 +1,17 @@
+GOAL P(Study|Pass)
+
+P(Study|Pass) = (P(Pass|Study) * P(Study)) / P(Pass)
+
+P(Study) = 0.6
+P(-Study) = 0.4
+
+P(smart) = 0.8
+P(-smart) = 0.2
+
+P(Prep|Study) = 0.8
+P(Prep|-Study) = 0.3
+
+0.8
+0.45
+
+P(Pass) = P(Pass|Study)*P(Study) + P(Pass|-Study)*P(-Study) = 
